@@ -5,6 +5,7 @@
   "dependencies": {
     "pygments": "visionmedia/node-pygments",
     "react": "^15.6.1",
+    "react-ace": "^5.2.0",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.11"
   },
