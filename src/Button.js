@@ -1,32 +1,21 @@
 import React, { Component } from 'react';
 import './Button.css';
 import colors from './colors.js';
+import Code from './Code.js';
+
+function shuffle(array) {
+	for (var i = array.length - 1; i > 0; i--) {
+		var j = Math.floor(Math.random() * (i + 1));
+		var temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+	}
+	return array;
+}
 
 var randomColors = function() {
 	let i = Math.floor(Math.random()*16777215) % 8;
-	return colors[i];
-}
-
-var build = function(colorCodes) {
-	var cssColors = new defaultDict();
-	// Function names
-	cssColors["nf"] = colorCodes[0];
-	cssColors["kd"] = colorCodes[1];
-	cssColors["o"] = colorCodes[2];
-	cssColors["kt"] = colorCodes[2];
-	return cssColors;
-}
-
-function defaultDict() {
-	this.get = function (key) {
-    console.log(key, this);
-		if (this.hasOwnProperty(key)) {
-      console.log("HAS KEY", key);
-			return this[key];
-		} else {
-			return "#abcdef";
-		}
-	}
+	return shuffle(colors[i]);
 }
 
 class Button extends Component {
@@ -35,25 +24,33 @@ class Button extends Component {
 		let colors = randomColors();
 		this.state = {
 			colors: colors,
-			cssColors: build(colors),
+			background: "#f6f8fa",
 		};
 		this.handleClick = this.handleClick.bind(this);
+		this.backgroundClick = this.backgroundClick.bind(this);
 	} 
 
 	handleClick() {
 		let newcolors = randomColors();
 		this.setState({
 			colors: newcolors,
-			cssColors: build(newcolors),
+		});
+	}
+
+	backgroundClick() {
+		this.setState({
+			background: this.state.background === "#f6f8fa" ? "#000" : "#f6f8fa",
 		});
 	}
 
 	render() {
 		let colors = this.state.colors;
+		let background = this.state.background;
 		return (
 			<div className="customContainer">
 				<div className="colorsButton">
 					<button className="btn btn-primary" onClick={this.handleClick}>color</button>
+					<button className="btn btn-primary" onClick={this.backgroundClick}>background</button>
 				</div>
 				<div className="sample">
 					<span style={{backgroundColor: colors[0]}} />
@@ -63,30 +60,11 @@ class Button extends Component {
 					<span style={{backgroundColor: colors[4]}} />
 				</div>
 				<div className="colors">
-					<pre>
-						<Code colors={colors}></Code>
-					</pre>
+          <Code colors={colors} background={background}></Code>
 				</div>
 			</div>
 		);
 	}
-}
-
-
-
-class Code extends Component {
-	constructor() {
-		super();
-		this.state = {
-		};
-	}
-	render() {
-		let cssColors = build(this.props.colors);
-		//return (<div>{"hi " + cssColors.get("o")}</div>);
-return (
-	<div style={{color: cssColors.get("highlight")}}><pre><span></span><span style={{color: cssColors.get("kd")}}>public</span> <span style={{color: cssColors.get("kd")}}>static</span> <span style={{color: cssColors.get("kt")}}>long</span> <span style={{color: cssColors.get("nf")}}>charts</span><span style={{color: cssColors.get("o")}}>(</span></pre></div>
-	);
-}
 }
 
 export default Button;
