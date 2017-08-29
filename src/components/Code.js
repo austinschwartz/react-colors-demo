@@ -59,8 +59,9 @@ async function highlightCode(code, lang=null) {
     });
 }
 
-function buildStyles(colors) {
-  return `.highlight{color:${colors[0]}}
+function buildStyles(colors, background) {
+  return `.highlight pre{background-color:${background}}
+  .highlight{color:${colors[0]}}
   .highlight .hll,
   .highlight .s,
   .highlight .sa,
@@ -157,6 +158,7 @@ class Code extends Component {
 		super(props);
 		this.state = {
 			cssColors: build(this.props.colors, this.props.background),
+      background: this.props.background,
 			highlightedCode: "",
     };
     highlightCode(
@@ -185,12 +187,10 @@ componentWillReceiveProps(nextProps) {
       <div className="highlight">
         <style 
           dangerouslySetInnerHTML=
-              {{__html: buildStyles(this.props.colors)}} />
-        <pre style=
-            {{backgroundColor: this.props.background}} 
-            className="highlight" 
+              {{__html: buildStyles(this.props.colors,this.props.background)}} />
+            <div 
             dangerouslySetInnerHTML=
-              {{__html: this.state.highlightedCode}}></pre>
+              {{__html: this.state.highlightedCode}}/>
       </div>
     );
   }
