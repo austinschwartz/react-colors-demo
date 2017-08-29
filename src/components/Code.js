@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-var build = function(colorCodes, background) {
+function build(colorCodes, background) {
 	var cssColors = new defaultDict();
   let c1 = ["hll","s","sa","sb","sc","dl","sd","s2","se","sh","si","sx","sr","s1", "ss"];
   let c2 = ["err","g","l","x","p","ge","gr","gh","gi","gp","gs","gu","gt","ld","no","nd","ni","ne","nn","nx","py","w","bp"];
@@ -44,35 +44,19 @@ function defaultDict() {
 	}
 }
 
-function code() {
-  return `setTextColor(hexcode) {
-    /* Determine whether to use light or dark text */
-    let color = 5;
-    let r = parseInt(color[1], 16),
-        g = parseInt(color[2], 16),
-        b = parseInt(color[3], 16);
-    return ((r*0.299 + g*0.587 + b*0.114) > 186 ? '#898F98' : '#D9DEE5');
-}`;
-}
-
-
-
-function highlightCode(code, lang=undefined) {
+async function highlightCode(code, lang=null) {
 	var formData = new FormData();
 	if (lang)
 		formData.append("lang", lang);
-	formData.append("code", code)
-	fetch('http://austinschwartz.com:6547', {
-		method: 'POST',
-		accept: 'application/json',
-    body: formData
-	})
-	.then(function(response) {
-		return response.text()
-	}).then(function(html) {
-		console.log(html);
-	});
-	return "";
+	formData.append("code", code);
+	return fetch('http://austinschwartz.com:6547', {
+      method: 'POST',
+      accept: 'application/json',
+      body: formData
+    })
+    .then(function(response) {
+      return response.text()
+    });
 }
 
 function buildStyles(colors) {
@@ -173,18 +157,41 @@ class Code extends Component {
 		super(props);
 		this.state = {
 			cssColors: build(this.props.colors, this.props.background),
-			background: (this.props.background ? this.props.background : "#f6f8fa"),
-			highlightedCode: highlightCode(code()),
+			highlightedCode: "",
     };
-	}
+    highlightCode(
+      this.props.code, 
+      this.props.language).then(html =>
+        this.setState({highlightedCode: html})
+      );
+  }
+
+componentWillReceiveProps(nextProps) {
+  if (nextProps.code !== this.state.code) {
+    this.setState({
+			code: nextProps.code
+		}, function() {
+			highlightCode(
+				nextProps.code, 
+				this.props.language).then(html =>
+					this.setState({highlightedCode: html})
+				);
+			});
+  }
+}
 
 	render() {
     return (
-    <div className="highlight">
-      <style dangerouslySetInnerHTML={{__html: buildStyles(this.props.colors)}} />
-      <pre style={{backgroundColor: this.state.background}} className="highlight" dangerouslySetInnerHTML={{__html: this.state.highlightedCode}}></pre>
-    </div>
-    
+      <div className="highlight">
+        <style 
+          dangerouslySetInnerHTML=
+              {{__html: buildStyles(this.props.colors)}} />
+        <pre style=
+            {{backgroundColor: this.props.background}} 
+            className="highlight" 
+            dangerouslySetInnerHTML=
+              {{__html: this.state.highlightedCode}}></pre>
+      </div>
     );
   }
 }

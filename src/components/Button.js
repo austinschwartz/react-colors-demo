@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './Button.css';
 import colors from './colors.js';
 import Code from './Code.js';
+import TextBox from './TextBox.js';
 
 function shuffle(array) {
 	for (var i = array.length - 1; i > 0; i--) {
@@ -19,22 +20,26 @@ var randomColors = function() {
 }
 
 class Button extends Component {
-	constructor() {
-		super();
-		let colors = randomColors();
+	constructor(props) {
+		super(props);
 		this.state = {
-			colors: colors,
+			colors: randomColors(),
 			background: "#f6f8fa",
+      code: '',
 		};
+
 		this.handleClick = this.handleClick.bind(this);
 		this.backgroundClick = this.backgroundClick.bind(this);
+    this.handler = this.handler.bind(this);
 	} 
 
 	handleClick() {
-		let newcolors = randomColors();
 		this.setState({
-			colors: newcolors,
-		});
+			colors: randomColors(),
+		}, function () {
+        console.log("new colors: " + this.state.colors);
+    });
+
 	}
 
 	backgroundClick() {
@@ -42,6 +47,15 @@ class Button extends Component {
 			background: this.state.background === "#f6f8fa" ? "#000" : "#f6f8fa",
 		});
 	}
+
+  handler(code) {
+    this.setState({
+      code: code,
+    }, function() {
+      console.log("new code: " + this.state.code);
+    });
+    this.forceUpdate();
+  }
 
 	render() {
 		let colors = this.state.colors;
@@ -60,7 +74,11 @@ class Button extends Component {
 					<span style={{backgroundColor: colors[4]}} />
 				</div>
 				<div className="colors">
-          <Code colors={colors} background={background}></Code>
+          <Code code={this.state.code} 
+                colors={colors} 
+                background={background}
+                language={"javascript"}></Code>
+          <TextBox handler = {this.handler}/>
 				</div>
 			</div>
 		);

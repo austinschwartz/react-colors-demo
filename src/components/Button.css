@@ -1,5 +1,5 @@
 div.colors {
-	margin-top: 50px;
+	margin-top: 10px;
 }
 
 div.sample {
@@ -22,10 +22,16 @@ div.sample span {
 
 .colorsButton {
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .colors {
 	text-align:left;
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
 }
 
 pre {
