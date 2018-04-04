@@ -4,7 +4,7 @@ class TextBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      code: 'var x = f("dog", 2 - 1);'
+      code: this.props.code,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -12,7 +12,6 @@ class TextBox extends Component {
   }
 
   handleChange(event) {
-    //console.log('Code changed: ' + event.target.value);
     this.setState({code: event.target.value});
   }
 

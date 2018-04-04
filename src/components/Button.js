@@ -15,8 +15,81 @@ function shuffle(array) {
 }
 
 var randomColors = function() {
-	let i = Math.floor(Math.random()*16777215) % 8;
+	let i = Math.floor(Math.random()*16777215) % colors.length;
 	return shuffle(colors[i]);
+}
+
+var defaultCode = function() {
+	return `public static String boardListToString(List<List<Short>> boards) {
+  StringJoiner ret = new StringJoiner("\\n");
+  for (List<Short> board : boards) {
+    StringJoiner sj = new StringJoiner("\\n");
+    for (short line : board)
+      sj.add(lineToString(line));
+    ret.add(sj.toString() + "\\n");
+  }
+  return ret.toString();
+}
+
+public static boolean conflicts(List<Short> board, short line) {
+  if (board == null || board.size() == 0)
+    return false;
+
+  short lastRow = board.get(board.size() - 1);
+  if (hasJumps(lastRow) && hasJumps(line))
+    return true;
+
+  return false;
+}
+
+public static boolean hasJumps(short line) {
+  return Integer.bitCount(line) > 1;
+}
+
+public static List<List<Short>> genBoardsOfLength(int n) {
+  List<List<Short>> ret = new ArrayList<>();
+  if (n == 0) {
+    return ret;
+  } else if (n == 1) {
+    for (short line: genRows()) {
+      List<Short> board = new ArrayList<Short>();
+      board.add(line);
+      ret.add(board);
+    }
+    return ret;
+  } else {
+    List<List<Short>> prevBoards = genBoardsOfLength(n - 1);
+    for (List<Short> board : prevBoards) {
+      for (short line : genRows()) {
+        if (conflicts(board, line))
+          continue;
+        List<Short> newBoard = new ArrayList<Short>(board);
+        newBoard.add(line);
+        ret.add(newBoard);
+      }
+    }
+  }
+  return ret;
+}
+
+
+public static String lineToString(short line) {
+  StringBuilder sb = new StringBuilder();
+  int count = Integer.bitCount(line);
+  sb.append((line & 1) > 0 ? '<' : '.');
+  sb.append((line & 2) > 0 ? '^' : '.');
+  sb.append((line & 4) > 0 ? 'v' : '.');
+  sb.append((line & 8) > 0 ? '>' : '.');
+  return sb.toString();
+}
+
+public static List<Short> genRows() {
+  List<Short> ret = new ArrayList<>();
+  for (short i = 0; i < (short)Math.pow(2, 4); i++)
+    if (Integer.bitCount(i) <= 2)
+      ret.add(i);
+  return ret;
+}`;
 }
 
 class Button extends Component {
@@ -25,7 +98,7 @@ class Button extends Component {
 		this.state = {
 			colors: randomColors(),
 			background: "#f6f8fa",
-      code: '',
+      code: defaultCode(),
 		};
 
 		this.handleClick = this.handleClick.bind(this);
@@ -77,8 +150,8 @@ class Button extends Component {
           <Code code={this.state.code} 
                 colors={colors} 
                 background={background}
-                language={"javascript"}></Code>
-          <TextBox handler = {this.handler}/>
+                language={"java"}></Code>
+          <TextBox code={this.state.code} handler = {this.handler}/>
 				</div>
 			</div>
 		);

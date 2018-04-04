@@ -1,55 +1,11 @@
 import React, { Component } from 'react';
 
-function build(colorCodes, background) {
-	var cssColors = new defaultDict();
-  let c1 = ["hll","s","sa","sb","sc","dl","sd","s2","se","sh","si","sx","sr","s1", "ss"];
-  let c2 = ["err","g","l","x","p","ge","gr","gh","gi","gp","gs","gu","gt","ld","no","nd","ni","ne","nn","nx","py","w","bp"];
-  let c3 = ["kd","kt","nb","nl","nv","vc","vg","vi","vm", "mi"];
-  let c4 = ["kd", "nb", "nl", "nv", "vc", "vg", "vi", "vm"];
-	let c5 = ["o", "cp", "kn", "kp", "kr", "nt", "ow", "k"];
-	if (background === '#f6f8fa')
-		cssColors["n"] = "#000";
-	else
-		cssColors["n"] = "#fff";
-
-  var i = 0;
-  // Mostly names
-  for (i = 0; i < c2.length; i++) {
-    cssColors[c2[i]] = colorCodes[4];
-  }
-
-  for (i = 0; i < c3.length; i++) {
-    cssColors[c3[i]] = colorCodes[3];
-  }
-  for (i = 0; i < c4.length; i++) {
-    cssColors[c4[i]] = colorCodes[2];
-  }
-  for (i = 0; i < c1.length; i++) {
-    cssColors[c1[i]] = colorCodes[1];
-  }
-
-  for (i = 0; i < c5.length; i++) {
-    cssColors[c5[i]] = colorCodes[0];
-  }
-	return cssColors;
-}
-
-function defaultDict() {
-	this.get = function (key) {
-		if (this.hasOwnProperty(key)) {
-			return this[key];
-		} else {
-			return "#000";
-		}
-	}
-}
-
 async function highlightCode(code, lang=null) {
 	var formData = new FormData();
 	if (lang)
 		formData.append("lang", lang);
 	formData.append("code", code);
-	return fetch('http://austinschwartz.com:6547', {
+	return fetch('https://infinite-lake-58284.herokuapp.com/', {
       method: 'POST',
       accept: 'application/json',
       body: formData
@@ -60,6 +16,7 @@ async function highlightCode(code, lang=null) {
 }
 
 function buildStyles(colors, background) {
+	var fixed = background === "#000" ? "#fff" : "#24292e";
   return `.highlight pre{background-color:${background}}
   .highlight{color:${colors[0]}}
   .highlight .hll,
@@ -77,7 +34,7 @@ function buildStyles(colors, background) {
   .highlight .sr,
   .highlight .s1,
   .highlight .ss{color:${colors[1]}}
-  .highlight .go{color:#44475a}
+  .highlight .go{color:${colors[2]}}
   .highlight .err,
   .highlight .g,
   .highlight .l,
@@ -101,7 +58,7 @@ function buildStyles(colors, background) {
   .highlight .nx,
   .highlight .py,
   .highlight .w,
-  .highlight .bp{color:${colors[0]}}
+  .highlight .bp{color:${fixed}}
   .highlight .gh,
   .highlight .gi,
   .highlight .gu{font-weight:bold}
@@ -133,16 +90,16 @@ function buildStyles(colors, background) {
   .highlight .na,
   .highlight .nc,
   .highlight .nf,
-  .highlight .fm{color:#6f42c1}
+  .highlight .fm{color:${colors[1]}}
   .highlight .kc{color:${colors[2]}}
-  .highlight .k{color:#d73a49}
+  .highlight .k{color:${colors[0]}}
   .highlight .o,
   .highlight .cp,
   .highlight .kn,
   .highlight .kp,
   .highlight .kr,
   .highlight .nt,
-  .highlight .ow{color:#d73a49}
+  .highlight .ow{color:${colors[1]}}
   .highlight .m,
   .highlight .mb,
   .highlight .mf,
@@ -157,7 +114,6 @@ class Code extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			cssColors: build(this.props.colors, this.props.background),
       background: this.props.background,
 			highlightedCode: "",
     };
@@ -173,6 +129,7 @@ componentWillReceiveProps(nextProps) {
     this.setState({
 			code: nextProps.code
 		}, function() {
+      console.log("Code component got new code: " + this.state.code);
 			highlightCode(
 				nextProps.code, 
 				this.props.language).then(html =>
@@ -184,13 +141,15 @@ componentWillReceiveProps(nextProps) {
 
 	render() {
     return (
-      <div className="highlight">
-        <style 
-          dangerouslySetInnerHTML=
-              {{__html: buildStyles(this.props.colors,this.props.background)}} />
-            <div 
+      <div>
+        <pre className="highlight">
+          <style 
             dangerouslySetInnerHTML=
-              {{__html: this.state.highlightedCode}}/>
+                {{__html: buildStyles(this.props.colors,this.props.background)}} />
+              <div 
+              dangerouslySetInnerHTML=
+                {{__html: this.state.highlightedCode}}/>
+        </pre>
       </div>
     );
   }
