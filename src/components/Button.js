@@ -20,75 +20,54 @@ var randomColors = function() {
 }
 
 var defaultCode = function() {
-	return `public static String boardListToString(List<List<Short>> boards) {
-  StringJoiner ret = new StringJoiner("\\n");
-  for (List<Short> board : boards) {
-    StringJoiner sj = new StringJoiner("\\n");
-    for (short line : board)
-      sj.add(lineToString(line));
-    ret.add(sj.toString() + "\\n");
-  }
-  return ret.toString();
-}
+	return `
+import java.util.*;
 
-public static boolean conflicts(List<Short> board, short line) {
-  if (board == null || board.size() == 0)
-    return false;
-
-  short lastRow = board.get(board.size() - 1);
-  if (hasJumps(lastRow) && hasJumps(line))
+public class OneAway {
+  public static boolean oneReplace(String a, String b) {
+    int differences = 0;
+    for (int i = 0; i < a.length(); i++) {
+      if (a.charAt(i) != b.charAt(i))
+        differences++;
+      if (differences > 1)
+        return false;
+    }
     return true;
-
-  return false;
-}
-
-public static boolean hasJumps(short line) {
-  return Integer.bitCount(line) > 1;
-}
-
-public static List<List<Short>> genBoardsOfLength(int n) {
-  List<List<Short>> ret = new ArrayList<>();
-  if (n == 0) {
-    return ret;
-  } else if (n == 1) {
-    for (short line: genRows()) {
-      List<Short> board = new ArrayList<Short>();
-      board.add(line);
-      ret.add(board);
-    }
-    return ret;
-  } else {
-    List<List<Short>> prevBoards = genBoardsOfLength(n - 1);
-    for (List<Short> board : prevBoards) {
-      for (short line : genRows()) {
-        if (conflicts(board, line))
-          continue;
-        List<Short> newBoard = new ArrayList<Short>(board);
-        newBoard.add(line);
-        ret.add(newBoard);
-      }
-    }
   }
-  return ret;
-}
 
+  public static boolean oneInsert(String a, String b) {
+    // a.length() < b.length()
+    int i, j = 0;
+    int differences = 0;
+    for (i = 0; i < a.length(); i++) {
+      if (a.charAt(i) != b.charAt(j)) {
+        j++;
+        differences++;
+      }
+      if (differences > 1)
+        return false;
+      j++;
+    }
+    return true;
+  }
 
-public static String lineToString(short line) {
-  StringBuilder sb = new StringBuilder();
-  int count = Integer.bitCount(line);
-  sb.append((line & 1) > 0 ? '<' : '.');
-  sb.append((line & 2) > 0 ? '^' : '.');
-  sb.append((line & 4) > 0 ? 'v' : '.');
-  sb.append((line & 8) > 0 ? '>' : '.');
-  return sb.toString();
-}
+  public static boolean oneAway(String a, String b) {
+    if (a.length() < b.length())
+      return oneInsert(a, b);
+    else if (a.length() > b.length())
+      return oneInsert(b, a);
+    else
+      return oneReplace(a, b);
+  }
 
-public static List<Short> genRows() {
-  List<Short> ret = new ArrayList<>();
-  for (short i = 0; i < (short)Math.pow(2, 4); i++)
-    if (Integer.bitCount(i) <= 2)
-      ret.add(i);
-  return ret;
+  public static void main(String[] args) {
+    System.out.println(oneAway("pale",  "ple") ? "true" : "false"); 
+    System.out.println(oneAway("pales", "pale") ? "true" : "false"); 
+    System.out.println(oneAway("pale",  "bale") ? "true" : "false"); 
+    System.out.println(oneAway("ale",   "bale") ? "true" : "false"); 
+    System.out.println(oneAway("xale",  "xal") ? "true" : "false"); 
+    System.out.println(oneAway("pale",  "bake") ? "true" : "false"); 
+  }
 }`;
 }
 
@@ -102,9 +81,18 @@ class Button extends Component {
 		};
 
 		this.handleClick = this.handleClick.bind(this);
+		this.handleShuffle = this.handleShuffle.bind(this);
 		this.backgroundClick = this.backgroundClick.bind(this);
     this.handler = this.handler.bind(this);
 	} 
+
+	handleShuffle() {
+		this.setState({
+			colors: shuffle(this.state.colors),
+		}, function () {
+        console.log("new colors: " + this.state.colors);
+    });
+	}
 
 	handleClick() {
 		this.setState({
@@ -112,7 +100,6 @@ class Button extends Component {
 		}, function () {
         console.log("new colors: " + this.state.colors);
     });
-
 	}
 
 	backgroundClick() {
@@ -137,6 +124,7 @@ class Button extends Component {
 			<div className="customContainer">
 				<div className="colorsButton">
 					<button className="btn btn-primary" onClick={this.handleClick}>color</button>
+					<button className="btn btn-primary" onClick={this.handleShuffle}>shuffle</button>
 					<button className="btn btn-primary" onClick={this.backgroundClick}>background</button>
 				</div>
 				<div className="sample">
